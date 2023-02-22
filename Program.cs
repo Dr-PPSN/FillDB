@@ -1,5 +1,8 @@
 ﻿using RestSharp;
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
 
 namespace FillDB
 {
@@ -10,9 +13,12 @@ namespace FillDB
         {
             Console.Clear();
             HttpClient client = new HttpClient();
+            var allTasks = new List<Task>();
+            var values = new Dictionary<string, string> {};
+            
             Console.WriteLine("Welcome to the FillDB program!");
             Console.WriteLine("Please enter the URL of the API (string)");
-            string url = Console.ReadLine();
+            string? url = Console.ReadLine();
             Console.Clear();
             Console.WriteLine("Please chose how many request should send (int)");
             int count = Convert.ToInt32(Console.ReadLine());
@@ -27,16 +33,24 @@ namespace FillDB
             switch (method)
             {
                 case "1":
-                    Get(url, count);
+                    Get(url);
                     break;
                 case "2":
-                    Post(url, count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        values.Add("un", RandomString(7) + "@gmail.com");
+                        values.Add("pw", RandomString(8));
+                        var content = new FormUrlEncodedContent(values);
+                        allTasks.Add(Task.Run(() => Post(url, content)));
+                        values.Clear();
+                    }
+                    Task.WhenAll(allTasks);
                     break;
                 case "3":
-                    Put(url, count);
+                    Put(url);
                     break;
                 case "4":
-                    Delete(url, count);
+                    Delete(url);
                     break;
                 default:
                     Console.WriteLine("Wrong input");
@@ -44,44 +58,39 @@ namespace FillDB
             }
             Console.WriteLine("Please Wait...");
             Console.ReadLine();
-            Main(null);
-            void Get(string url, int count)
+            Main(args);
+            void Get(string? url)
             {
 
             }
-            async void Post(string url, int count)
+            async void Post(string? url, FormUrlEncodedContent content)
             {
-                var values = new Dictionary<string, string>
-                {
-                    { "un", RandomString(10) },
-                    { "pw", RandomString(6) }
-                };
-
-                var content = new FormUrlEncodedContent(values);
-
-                for (int i = 0; i < count; i++)
+                Console.WriteLine(url);
+                try
                 {
                     var response = await client.PostAsync(url, content);
                     var responseString = await response.Content.ReadAsStringAsync();
-                    Output(responseString);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        Console.WriteLine("Success");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error");
+                    }
                 }
-                
-                Console.ReadLine();
-                Main(null);
+                catch (Exception e)
+                {
+                    Console.WriteLine("Fehler: " + e);
+                }
             }
-            void Put(string url, int count)
+            void Put(string? url)
             {
 
             }
-            void Delete(string url, int count)
+            void Delete(string? url)
             {
 
-            }
-            async void Output(string txt)
-            {
-                Console.WriteLine("");
-                Console.WriteLine("Response:");
-                Console.WriteLine(txt);
             }
         }
         public static string RandomString(int length)

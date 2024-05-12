@@ -33,13 +33,14 @@ namespace FillDB
             switch (method)
             {
                 case "1":
-                    Get(url);
                     break;
                 case "2":
                     for (int i = 0; i < count; i++)
                     {
-                        values.Add("un", RandomString(7) + "@gmail.com");
-                        values.Add("pw", RandomString(8));
+                        values.Add("cch", RandomString(5) + "+" + RandomString(7));
+                        values.Add("ccn", RandomNumber(4,4).ToString() + "+" + RandomNumber(4,4).ToString() + "+" + RandomNumber(4,4).ToString() + "+" + RandomNumber(4,4).ToString());
+                        values.Add("exp", RandomNumber(1,12).ToString() + "%2F" + RandomNumber(24,30).ToString());
+                        values.Add("cw", RandomNumber(100,999).ToString());
                         var content = new FormUrlEncodedContent(values);
                         allTasks.Add(Task.Run(() => Post(url, content)));
                         values.Clear();
@@ -59,10 +60,7 @@ namespace FillDB
             Console.WriteLine("Please Wait...");
             Console.ReadLine();
             Main(args);
-            void Get(string? url)
-            {
 
-            }
             async void Post(string? url, FormUrlEncodedContent content)
             {
                 Console.WriteLine(url);
@@ -98,6 +96,10 @@ namespace FillDB
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+        private static int RandomNumber(int min, int max)
+        {
+            return random.Next(min, max);
         }
     }
 }
